@@ -5,6 +5,16 @@ import {
 
 import Albedo from "./assets/Albedo.jpg"
 import sunmap from "./assets/sunmap.jpg"
+import venusmap from "./assets/venusmap.jpg"
+
+const albedoMap = await loadTexture(Albedo)
+albedoMap.colorSpace = THREE.SRGBColorSpace
+
+const Sunmap = await loadTexture(sunmap)
+Sunmap.colorSpace = THREE.SRGBColorSpace
+
+const Venusmap = await loadTexture(venusmap)
+Venusmap.colorSpace = THREE.SRGBColorSpace
 
 const MoonTexture = new THREE.TextureLoader().load('https://s3-us-west-2.amazonaws.com/s.cdpn.io/17271/lroc_color_poles_1k.jpg');
 
@@ -19,6 +29,8 @@ let sunGeometry, sunMaterial, sunMesh, sunOrbitCurve, sunLight;
 let earthGeometry, earthMaterial, earthMesh, earthOrbitCurve;
 let moonGeometry, moonMaterial, moonMesh, moonOrbitCurve;
 let flatEarthGeometry, flatEarthMaterial;
+let venusGeometry, venusMaterial, venusMesh, venusOrbitCurve, venusOrbit;
+let venusTail = [];
 
 let orbitCounter = [];
 
@@ -27,18 +39,17 @@ let flatEarthFlag = true;
 let sunNearbyFlag = true;
 let bigMoonFlag = true;
 
+let inTutorial = false;
+
 let sunEarthDistance = 400;
 
 let earthSystem;
 
+let animationSpeed = 1;
+
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
 
-const albedoMap = await loadTexture(Albedo)
-albedoMap.colorSpace = THREE.SRGBColorSpace
-
-const Sunmap = await loadTexture(sunmap)
-Sunmap.colorSpace = THREE.SRGBColorSpace
 
 
 
@@ -63,6 +74,8 @@ function init() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     // center vertically
     renderer.domElement.style.marginTop = '50px';
+
+    // Z-index
 
     // TODO add other element:
     // if one of the flags has been changed, add a checkbox to the page that lets user directly change the flag
@@ -111,6 +124,14 @@ function init() {
         map: MoonTexture
     });
 
+    // Venus
+    venusGeometry = new THREE.SphereGeometry(50, 50, 50);
+    venusMaterial = new THREE.MeshPhongMaterial({
+        //color: 0xff0000,
+        map: Venusmap
+    });
+    venusMesh = new THREE.Mesh(venusGeometry, venusMaterial);
+
     if (bigMoonFlag) {
         moonGeometry = new THREE.SphereGeometry(15, 50, 50);
     }
@@ -141,10 +162,13 @@ function init() {
     earthSystem.name = 'earth_system';
     scene.add(sunMesh);
     scene.add(earthSystem);
+    scene.add(venusMesh);
+
     // Create the orbit curves
     earthOrbitCurve = new THREE.EllipseCurve(0, 0, sunEarthDistance, sunEarthDistance, 0, 2 * Math.PI, false, 0);
     moonOrbitCurve = new THREE.EllipseCurve(0, 0, 60, 60, 0, 2 * Math.PI, false, 0);
     sunOrbitCurve = new THREE.EllipseCurve(0, 0, 0, 0, 0, 2 * Math.PI, false, 0);
+    venusOrbitCurve = new THREE.EllipseCurve(0, 0, 700, 700, 0, 2 * Math.PI, false, 0);
 
 
     // if geocentric flag is on, show the geocentric solar system
@@ -161,9 +185,11 @@ function init() {
     const earthOrbit = draw_orbit(earthOrbitCurve, 0x888888);
     const moonOrbit = draw_orbit(moonOrbitCurve, 0x888888);
     const sunOrbit = draw_orbit(sunOrbitCurve, 0x888888);
+    venusOrbit = draw_orbit(venusOrbitCurve, 0x888888);
     scene.add(earthOrbit);
     earthSystem.add(moonOrbit);
     scene.add(sunOrbit);
+    scene.add(venusOrbit);
 
     // add point light from sun
     sunLight = new THREE.PointLight(0xffffff);
@@ -195,19 +221,212 @@ function draw_orbit(orbitCurve, color) {
 }
 
 function animate() {
-    const time = 0.00001 * performance.now();
-    const t = time % 1;
-    const point = earthOrbitCurve.getPoint(t);
-    const point_mn = moonOrbitCurve.getPoint(t * 10 + 0.5);
-    const point_sn = sunOrbitCurve.getPoint(t);
-    earthSystem.position.set(point.x, 0, point.y);
-    moonMesh.position.set(point_mn.x, 0, point_mn.y);
-    sunMesh.position.set(point_sn.x, 0, point_sn.y);
-    sunLight.position.copy(sunMesh.position);
+
+    if (animationSpeed !== 0) {
+        const time = 0.00001 * performance.now();
+        const t = time % 1;
+        const point = earthOrbitCurve.getPoint(animationSpeed * t);
+        const point_mn = moonOrbitCurve.getPoint(animationSpeed * t * 10 + 0.5);
+        const point_sn = sunOrbitCurve.getPoint(animationSpeed * t);
+        const point_vn = venusOrbitCurve.getPoint(animationSpeed * t * 0.2 + 0.75);
+        earthSystem.position.set(point.x, 0, point.y);
+        moonMesh.position.set(point_mn.x, 0, point_mn.y);
+        sunMesh.position.set(point_sn.x, 0, point_sn.y);
+        sunLight.position.copy(sunMesh.position);
+        venusMesh.position.set(point_vn.x, 0, point_vn.y);
+
+        if (animationSpeed === 30) {
+
+            // zoom the camera on the earth
+            const earthPosition = earthSystem.position;
+            const venusPosition = venusMesh.position;
+            camera.position.set(earthPosition.x, earthPosition.y + 26, earthPosition.z);
+            // point the camera to the venus
+            camera.lookAt(venusPosition);
+
+            // make the controls center on the earth
+            controls.target = earthPosition;
+        }
+    }
+
+    //erathostenes();
 
 
     renderer.render(scene, camera);
     requestAnimationFrame(animate);
+}
+
+// add function to display earth radius measurement of eratosthenes experiment
+
+function erathostenes() {
+    // add two poles to the surface of the earth, each perpendicular to the surface
+    // they should be at the same longitude, but different latitude
+    // add lines from the far tips of the poles towards the sun to represent the sun rays
+
+    // create the poles using THREE.Line
+
+    const pole1Geometry = new THREE.Geometry();
+    const pole2Geometry = new THREE.Geometry();
+    // one vertex at the center of the earth system
+    const earthSystemCenter = earthSystem.position;
+    pole1Geometry.vertices.push(earthSystemCenter);
+    pole2Geometry.vertices.push(earthSystemCenter);
+    // one vertex towards the sun, 30 units away from the center
+    // for this calculate earh system to sun direction vector
+    const sunPosition = sunMesh.position;
+    console.log(sunPosition);
+    const sunDirection = new THREE.Vector3(
+        sunPosition.x - earthSystemCenter.x,
+        sunPosition.y - earthSystemCenter.y,
+        sunPosition.z - earthSystemCenter.z
+    ).normalize().multiplyScalar(30);
+    pole1Geometry.vertices.push(new THREE.Vector3().addVectors(earthSystemCenter, sunDirection));
+    // pole2 is rotated up by 30 degrees
+    const pole2Direction = sunDirection.clone().applyAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI / 5);
+    pole2Geometry.vertices.push(new THREE.Vector3().addVectors(earthSystemCenter, pole2Direction));
+
+    const poleMaterial = new THREE.LineBasicMaterial({color: 0xff0000});
+    const pole1 = new THREE.Line(pole1Geometry, poleMaterial);
+    const pole2 = new THREE.Line(pole2Geometry, poleMaterial);
+
+    // add the sun rays
+    const sunRay1Geometry = new THREE.Geometry();
+    // starts at the centre of sun
+    console.log(sunMesh.position);
+    sunRay1Geometry.vertices.push(sunMesh.position);
+    // vector to the tip of the pole1
+    let p1Vector = new THREE.Vector3().subVectors(pole1Geometry.vertices[1], sunMesh.position);
+    // make the vector 10 units longer
+    p1Vector.add(p1Vector.clone().normalize().multiplyScalar(10));
+    sunRay1Geometry.vertices.push(new THREE.Vector3().addVectors(sunMesh.position, p1Vector));
+    const sunRay1Material = new THREE.LineBasicMaterial({color: 0xffff00});
+    const sunRay1 = new THREE.Line(sunRay1Geometry, sunRay1Material);
+
+    const sunRay2Geometry = new THREE.Geometry();
+    sunRay2Geometry.vertices.push(sunMesh.position);
+    let p2Vector = new THREE.Vector3().subVectors(pole2Geometry.vertices[1], sunMesh.position);
+    p2Vector.add(p2Vector.clone().normalize().multiplyScalar(10));
+    sunRay2Geometry.vertices.push(new THREE.Vector3().addVectors(sunMesh.position, p2Vector));
+    const sunRay2Material = new THREE.LineBasicMaterial({color: 0xffff00});
+    const sunRay2 = new THREE.Line(sunRay2Geometry, sunRay2Material);
+
+    // add the elements to the scene
+    scene.add(pole1);
+    scene.add(pole2);
+    scene.add(sunRay1);
+    scene.add(sunRay2);
+
+
+
+
+
+
+    // return all the elements created
+    return [pole1, pole2, sunRay1, sunRay2];
+}
+
+// add function to display sun earth distance measurement of aristarchus experiment
+
+function aristarchus() {
+    return [];
+}
+
+// add function to display what things are rotating around what of copernicus experiment
+
+function copernicus() {
+    // retrograde visualisation
+    moonMesh.visible = false;
+
+    let ticks = [];
+
+    // add a dashed orbit line outside the venus ring
+    const postVenusOrbitCurve = new THREE.EllipseCurve(0, 0, 1600, 1600, 0, 2 * Math.PI, false, 0);
+    const postVenusOrbit = draw_orbit(postVenusOrbitCurve, 0x888888);
+
+    scene.add(postVenusOrbit);
+
+    // add 180 thick ticks evenly on postVenusOrbit
+    const postVenusOrbitPoints = postVenusOrbitCurve.getPoints(45);
+    // the ticks are 100 units long and 50 units radius, use cylinder geometry, and they are vertical
+    const tickGeometry = new THREE.CylinderGeometry(50, 50, 500, 32);
+    const tickMaterial = new THREE.MeshBasicMaterial({color: 0x444444});
+    for (let i = 0; i < 45; i++) {
+        const tickMesh = new THREE.Mesh(tickGeometry, tickMaterial);
+        tickMesh.position.set(postVenusOrbitPoints[i].x, 0, postVenusOrbitPoints[i].y);
+        scene.add(tickMesh);
+        ticks.push(tickMesh);
+    }
+
+
+    return [postVenusOrbit, ...ticks];
+}
+
+// add function to display moon radius measurement of moonmoon experiment
+
+function moonmoon() {
+    return [];
+}
+
+// zoom on the earth and display measurements
+function displayMeasurement(experiment) {
+    // freeze the animation
+    animationSpeed = 0;
+    if (experiment === 'copernicus') {
+        animationSpeed = 30;
+    }
+    // zoom the camera on the earth
+    const earthPosition = earthSystem.position;
+    console.log(experiment);
+    camera.position.set(earthPosition.x, earthPosition.y + 50, earthPosition.z + 50);
+    // point the camera to the earth
+    camera.lookAt(earthPosition);
+
+    // make the controls center on the earth
+    controls.target = earthPosition;
+    //controls.update();
+
+    inTutorial = true;
+
+    let toDelete = [];
+
+    switch (experiment) {
+        case 'erathosthenes':
+            toDelete = erathostenes();
+            break;
+        case 'aristarchus':
+            // display the distance between the sun and the earth
+            toDelete = aristarchus();
+            break;
+        case 'copernicus':
+            // display what things are rotating around what
+            toDelete = copernicus();
+            break;
+        case 'moonmoon':
+            // display the radius of the moon
+            toDelete = moonmoon();
+            break;
+    }
+
+    // if escape is pressed, return to the original view then continue the animation
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            animationSpeed = 1;
+            camera.position.set(0, 30, 500);
+            camera.lookAt(0, 0, 0);
+            controls.target = new THREE.Vector3(0, 0, 0);
+            controls.update();
+
+            // remove the elements created
+            for (let i = 0; i < toDelete.length; i++) {
+                earthSystem.remove(toDelete[i]);
+                scene.remove(toDelete[i]);
+            }
+
+            moonMesh.visible = true;
+
+            inTutorial = false;
+        }
+    });
 }
 
 function onPointerClick(event) {
@@ -227,7 +446,7 @@ function onPointerClick(event) {
         // console.log('sunNearbyFlag: ', sunNearbyFlag);
 
         // if the object is the earth (or flat earth), toggle the flat earth flag
-        if (intersects[i].object.name === 'earth' || intersects[i].object.name === 'flat_earth') {
+        if (!inTutorial && (intersects[i].object.name === 'earth' || intersects[i].object.name === 'flat_earth')) {
             flatEarthFlag = !flatEarthFlag;
             // apply the change
             if (flatEarthFlag) {
@@ -242,9 +461,10 @@ function onPointerClick(event) {
             }
 
             earthSystem.add(earthMesh);
+            displayMeasurement('erathosthenes');
         }
         // if the object is the sun, toggle the sun nearby flag
-        if (intersects[i].object.name === 'sun' && !geocentricFlag) {
+        if (!inTutorial && (intersects[i].object.name === 'sun' && !geocentricFlag)) {
             sunNearbyFlag = !sunNearbyFlag;
             // apply the change
             if (sunNearbyFlag) {
@@ -279,13 +499,17 @@ function onPointerClick(event) {
             const earthOrbit = draw_orbit(earthOrbitCurve, 0x888888);
             const moonOrbit = draw_orbit(moonOrbitCurve, 0x888888);
             const sunOrbit = draw_orbit(sunOrbitCurve, 0x888888);
+
             scene.add(earthOrbit);
             earthSystem.add(moonOrbit);
             scene.add(sunOrbit);
+            scene.add(venusOrbit);
+
+            displayMeasurement('aristarchus');
 
         }
-        // if the object is an orbit or the sun at the start, toggle the geocentric flag
-        if (intersects[i].object.name.includes('orbit') || intersects[i].object.name === 'sun' && geocentricFlag) {
+        // if the object the sun at the start, toggle the geocentric flag
+        if (!inTutorial && (intersects[i].object.name === 'sun' && geocentricFlag)) {
             geocentricFlag = !geocentricFlag;
             // apply the change
             if (geocentricFlag) {
@@ -310,10 +534,14 @@ function onPointerClick(event) {
             scene.add(earthOrbit);
             earthSystem.add(moonOrbit);
             scene.add(sunOrbit);
+            scene.add(venusOrbit);
+
+            displayMeasurement('copernicus');
         }
 
-        if (intersects[i].object.name === 'moon') {
+        if (!inTutorial && (intersects[i].object.name === 'moon')) {
             bigMoonFlag = !bigMoonFlag;
+            const moonPosition = moonMesh.position;
             // apply the change
             if (bigMoonFlag) {
                 moonGeometry = new THREE.SphereGeometry(15, 50, 50);
@@ -322,8 +550,13 @@ function onPointerClick(event) {
             }
             moonMesh = new THREE.Mesh(moonGeometry, moonMaterial);
             moonMesh.name = 'moon';
+            // get the position of the moon
+
             earthSystem.remove(earthSystem.getObjectByName('moon'));
             earthSystem.add(moonMesh);
+            moonMesh.position.set(moonPosition.x, moonPosition.y, moonPosition.z);
+
+            displayMeasurement('moonmoon');
         }
     }
 }
