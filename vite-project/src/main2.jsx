@@ -25,6 +25,7 @@ let orbitCounter = [];
 let geocentricFlag = true;
 let flatEarthFlag = true;
 let sunNearbyFlag = true;
+let bigMoonFlag = true;
 
 let sunEarthDistance = 400;
 
@@ -46,8 +47,8 @@ function onPointerMove(event) {
     // calculate pointer position in normalized device coordinates
     // (-1 to +1) for both components
 
-    pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
-    pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    pointer.x = (event.clientX / (window.innerWidth)) * 2 - 1;
+    pointer.y = -(event.clientY / (window.innerHeight)) * 2 + 1;
 
 }
 
@@ -60,6 +61,13 @@ function init() {
 
     renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
+    // center vertically
+    renderer.domElement.style.marginTop = '50px';
+
+    // TODO add other element:
+    // if one of the flags has been changed, add a checkbox to the page that lets user directly change the flag
+    // if all the flags have been changed, add a button to the page that lets user start quiz
+
     document.body.appendChild(renderer.domElement);
 
     const ambientLight = new THREE.AmbientLight(0x888888);
@@ -102,6 +110,11 @@ function init() {
         //color: 0x808080,
         map: MoonTexture
     });
+
+    if (bigMoonFlag) {
+        moonGeometry = new THREE.SphereGeometry(15, 50, 50);
+    }
+
     moonMesh = new THREE.Mesh(moonGeometry, moonMaterial);
     moonMesh.name = 'moon';
 
@@ -271,8 +284,8 @@ function onPointerClick(event) {
             scene.add(sunOrbit);
 
         }
-        // if the object is the moon or an orbit, toggle the geocentric flag
-        if (intersects[i].object.name === 'moon' || intersects[i].object.name.includes('orbit') || intersects[i].object.name === 'sun' && geocentricFlag) {
+        // if the object is an orbit or the sun at the start, toggle the geocentric flag
+        if (intersects[i].object.name.includes('orbit') || intersects[i].object.name === 'sun' && geocentricFlag) {
             geocentricFlag = !geocentricFlag;
             // apply the change
             if (geocentricFlag) {
@@ -286,7 +299,6 @@ function onPointerClick(event) {
             }
 
             // update the orbits
-            // TODO: removal needs to be fixed
             for (let i = 0; i < orbitCounter.length; i++) {
                 scene.remove(scene.getObjectByName('orbit' + i));
                 earthSystem.remove(earthSystem.getObjectByName('orbit' + i));
@@ -298,7 +310,20 @@ function onPointerClick(event) {
             scene.add(earthOrbit);
             earthSystem.add(moonOrbit);
             scene.add(sunOrbit);
+        }
 
+        if (intersects[i].object.name === 'moon') {
+            bigMoonFlag = !bigMoonFlag;
+            // apply the change
+            if (bigMoonFlag) {
+                moonGeometry = new THREE.SphereGeometry(15, 50, 50);
+            } else {
+                moonGeometry = new THREE.SphereGeometry(6, 50, 50);
+            }
+            moonMesh = new THREE.Mesh(moonGeometry, moonMaterial);
+            moonMesh.name = 'moon';
+            earthSystem.remove(earthSystem.getObjectByName('moon'));
+            earthSystem.add(moonMesh);
         }
     }
 }
