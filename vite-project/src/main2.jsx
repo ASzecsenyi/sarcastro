@@ -3,12 +3,19 @@ import {
     OrbitControls
 } from "https://web.cs.manchester.ac.uk/three/three.js-master/examples/jsm/controls/OrbitControls.js";
 
+import Albedo from "./assets/Albedo.jpg"
+import sunmap from "./assets/sunmap.jpg"
+
+const MoonTexture = new THREE.TextureLoader().load('https://s3-us-west-2.amazonaws.com/s.cdpn.io/17271/lroc_color_poles_1k.jpg');
+
+import { loadTexture } from "./common_utils.js"
+
 // Create and interactive solar system representation
 
 // Global variables
 let scene, camera, renderer, controls;
 
-let sunGeometry, sunMaterial, sunMesh, sunOrbitCurve;
+let sunGeometry, sunMaterial, sunMesh, sunOrbitCurve, sunLight;
 let earthGeometry, earthMaterial, earthMesh, earthOrbitCurve;
 let moonGeometry, moonMaterial, moonMesh, moonOrbitCurve;
 let flatEarthGeometry, flatEarthMaterial;
@@ -25,6 +32,13 @@ let earthSystem;
 
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
+
+const albedoMap = await loadTexture(Albedo)
+albedoMap.colorSpace = THREE.SRGBColorSpace
+
+const Sunmap = await loadTexture(sunmap)
+Sunmap.colorSpace = THREE.SRGBColorSpace
+
 
 
 function onPointerMove(event) {
@@ -56,13 +70,15 @@ function init() {
     // Flat Earth
     flatEarthGeometry = new THREE.CylinderGeometry(50, 50, 10, 32);
     flatEarthMaterial = new THREE.MeshPhongMaterial({
-        color: 0x0000ff
+        //color: 0x0000ff,
+        map: albedoMap
     });
 
     // Earth
     earthGeometry = new THREE.SphereGeometry(25, 50, 50);
     earthMaterial = new THREE.MeshPhongMaterial({
-        color: 0x0000ff
+        //color: 0x0000ff,
+        map: albedoMap
     });
     earthMesh = new THREE.Mesh(earthGeometry, earthMaterial);
     // set the name of the object
@@ -72,8 +88,10 @@ function init() {
     sunGeometry = new THREE.SphereGeometry(109, 400, 200);
     sunMaterial = new THREE.MeshStandardMaterial({
         emissive: 0xffd700,
-        emissiveIntensity: 1,
-        wireframe: false
+        emissiveIntensity: 0.5,
+        //color: 0xffd700,
+        map: Sunmap,
+        //wireframe: false
     });
     sunMesh = new THREE.Mesh(sunGeometry, sunMaterial);
     sunMesh.name = 'sun';
@@ -81,7 +99,8 @@ function init() {
     // Moon
     moonGeometry = new THREE.SphereGeometry(6, 50, 50);
     moonMaterial = new THREE.MeshPhongMaterial({
-        color: 0x808080
+        //color: 0x808080,
+        map: MoonTexture
     });
     moonMesh = new THREE.Mesh(moonGeometry, moonMaterial);
     moonMesh.name = 'moon';
@@ -133,6 +152,12 @@ function init() {
     earthSystem.add(moonOrbit);
     scene.add(sunOrbit);
 
+    // add point light from sun
+    sunLight = new THREE.PointLight(0xffffff);
+    sunLight.position.copy(sunMesh.position);
+    // move the light source to the sun
+    scene.add(sunLight);
+
 
     // Add orbit controls
     controls = new OrbitControls(camera, renderer.domElement);
@@ -165,6 +190,7 @@ function animate() {
     earthSystem.position.set(point.x, 0, point.y);
     moonMesh.position.set(point_mn.x, 0, point_mn.y);
     sunMesh.position.set(point_sn.x, 0, point_sn.y);
+    sunLight.position.copy(sunMesh.position);
 
 
     renderer.render(scene, camera);
@@ -186,6 +212,7 @@ function onPointerClick(event) {
         // console.log('geocentricFlag: ', geocentricFlag);
         // console.log('flatEarthFlag: ', flatEarthFlag);
         // console.log('sunNearbyFlag: ', sunNearbyFlag);
+
         // if the object is the earth (or flat earth), toggle the flat earth flag
         if (intersects[i].object.name === 'earth' || intersects[i].object.name === 'flat_earth') {
             flatEarthFlag = !flatEarthFlag;
@@ -194,6 +221,7 @@ function onPointerClick(event) {
                 earthMesh = new THREE.Mesh(flatEarthGeometry, flatEarthMaterial);
                 earthSystem.remove(earthSystem.getObjectByName('earth'));
                 earthMesh.name = 'flat_earth';
+
             } else {
                 earthMesh = new THREE.Mesh(earthGeometry, earthMaterial);
                 earthSystem.remove(earthSystem.getObjectByName('flat_earth'));
@@ -232,6 +260,7 @@ function onPointerClick(event) {
             // update the orbits
             for (let i = 0; i < orbitCounter.length; i++) {
                 scene.remove(scene.getObjectByName('orbit' + i));
+                earthSystem.remove(earthSystem.getObjectByName('orbit' + i));
             }
             orbitCounter = [];
             const earthOrbit = draw_orbit(earthOrbitCurve, 0x888888);
@@ -260,6 +289,7 @@ function onPointerClick(event) {
             // TODO: removal needs to be fixed
             for (let i = 0; i < orbitCounter.length; i++) {
                 scene.remove(scene.getObjectByName('orbit' + i));
+                earthSystem.remove(earthSystem.getObjectByName('orbit' + i));
             }
             orbitCounter = [];
             const earthOrbit = draw_orbit(earthOrbitCurve, 0x888888);
