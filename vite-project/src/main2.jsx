@@ -106,7 +106,7 @@ function init() {
     earthMesh.name = 'earth';
 
     // Sun
-    sunGeometry = new THREE.SphereGeometry(109, 400, 200);
+    sunGeometry = new THREE.SphereGeometry(75, 400, 200);
     sunMaterial = new THREE.MeshStandardMaterial({
         emissive: 0xffd700,
         emissiveIntensity: 0.5,
@@ -364,7 +364,70 @@ function copernicus() {
 // add function to display moon radius measurement of moonmoon experiment
 
 function moonmoon() {
-    return [];
+
+    moonMesh.visible = false;
+
+    // calculate sun earth vector
+    const sunPosition = sunMesh.position;
+    const earthPosition = earthSystem.position;
+    const sunEarthVector = new THREE.Vector3(
+        - sunPosition.x + earthPosition.x,
+        - sunPosition.y + earthPosition.y,
+        - sunPosition.z + earthPosition.z
+    );
+
+    // add five decoy moons: one just opposite of the sun, one 45 degrees to the right, one 45 degrees to the left
+    // the moons are on their usual orbit
+
+    // create the decoy moons
+    const moonGeometry = new THREE.SphereGeometry(6, 50, 50);
+    const moonMaterial = new THREE.MeshPhongMaterial({
+        //color: 0x808080,
+        map: MoonTexture
+    });
+    const moonMaterialInner = new THREE.MeshPhongMaterial({
+        color: 0x606060,
+        map: MoonTexture
+    });
+    const moonMaterialMiddle = new THREE.MeshPhongMaterial({
+        color: 0x202020,
+        map: MoonTexture
+    });
+
+    const moon1 = new THREE.Mesh(moonGeometry, moonMaterial);
+    const moon2 = new THREE.Mesh(moonGeometry, moonMaterialInner);
+    const moon3 = new THREE.Mesh(moonGeometry, moonMaterialMiddle);
+    const moon4 = new THREE.Mesh(moonGeometry, moonMaterialInner);
+    const moon5 = new THREE.Mesh(moonGeometry, moonMaterial);
+
+    // calculate the positions of the moons
+    let moonOrbitRadius = 60;
+    if (geocentricFlag) {
+        moonOrbitRadius = 120;
+    }
+
+    const moon1Position = new THREE.Vector3().addVectors(earthPosition, sunEarthVector.clone().normalize().applyAxisAngle(new THREE.Vector3(0, 1, 0), 2 * Math.PI / 6).multiplyScalar(moonOrbitRadius));
+    const moon2Position = new THREE.Vector3().addVectors(earthPosition, sunEarthVector.clone().normalize().applyAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI / 6).multiplyScalar(moonOrbitRadius));
+    const moon3Position = new THREE.Vector3().addVectors(earthPosition, sunEarthVector.clone().normalize().multiplyScalar(moonOrbitRadius));
+    const moon4Position = new THREE.Vector3().addVectors(earthPosition, sunEarthVector.clone().normalize().applyAxisAngle(new THREE.Vector3(0, 1, 0), -Math.PI / 6).multiplyScalar(moonOrbitRadius));
+    const moon5Position = new THREE.Vector3().addVectors(earthPosition, sunEarthVector.clone().normalize().applyAxisAngle(new THREE.Vector3(0, 1, 0), -2 * Math.PI / 6).multiplyScalar(moonOrbitRadius));
+
+
+    // set the positions of the moons
+    moon1.position.set(moon1Position.x, moon1Position.y, moon1Position.z);
+    moon2.position.set(moon2Position.x, moon2Position.y, moon2Position.z);
+    moon3.position.set(moon3Position.x, moon3Position.y, moon3Position.z);
+    moon4.position.set(moon4Position.x, moon4Position.y, moon4Position.z);
+    moon5.position.set(moon5Position.x, moon5Position.y, moon5Position.z);
+
+    // add the moons to the scene
+    scene.add(moon1);
+    scene.add(moon2);
+    scene.add(moon3);
+    scene.add(moon4);
+    scene.add(moon5);
+
+    return [moon1, moon2, moon3, moon4, moon5];
 }
 
 // zoom on the earth and display measurements
