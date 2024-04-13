@@ -1,5 +1,5 @@
 import * as THREE from "https://web.cs.manchester.ac.uk/three/three.js-master/build/three.module.js";
-    import { OrbitControls } from "https://web.cs.manchester.ac.uk/three/three.js-master/examples/jsm/controls/OrbitControls.js";
+import { OrbitControls } from "https://web.cs.manchester.ac.uk/three/three.js-master/examples/jsm/controls/OrbitControls.js";
 
     // Global variables
 let scene, camera, renderer;
@@ -10,6 +10,18 @@ let earthOrbitCurve;
 let moonOrbitCurve;
 let controls;
 let cloudMesh;
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
+
+function onPointerMove( event ) {
+
+	// calculate pointer position in normalized device coordinates
+	// (-1 to +1) for both components
+
+	pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+	pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+}
 
 // Initialize the scene
 function init() {
@@ -52,17 +64,17 @@ function init() {
 
   // Load the cloud texture
   // clouds do not appear on the web browser & Debugging is needed
-  const cloudTexture = new THREE.TextureLoader().load('https://i.stack.imgur.com/B3c7G.jpg');
+  const cloudTexture = new THREE.TextureLoader().load('vite-project/src/assets/B3c7G.jpg');
 
   // Create the cloud layer
-  const cloudGeometry = new THREE.SphereGeometry(26, 50, 50);
+  const cloudGeometry = new THREE.CylinderGeometry(50, 50, 10, 32);
   const cloudMaterial = new THREE.MeshPhongMaterial({
     map: cloudTexture,
     transparent: true,
     opacity: 4.8
   });
   cloudMesh = new THREE.Mesh(cloudGeometry, cloudMaterial);
-  earthMesh.add(cloudMesh);
+  sunMesh.add(cloudMesh);
 
   // Create the moon
   moonGeometry = new THREE.SphereGeometry(5, 40, 20);
@@ -133,6 +145,19 @@ function animate() {
 
   moonMesh.rotation.y += 0.02;
 
+  // update the picking ray with the camera and pointer position
+  raycaster.setFromCamera( pointer, camera );
+
+  // calculate objects intersecting the picking ray
+  const intersects = raycaster.intersectObjects( scene.children );
+
+  for ( let i = 0; i < intersects.length; i ++ ) {
+
+      //intersects[ i ].object.material.color.set( 0xff0000 );
+      console.log('sad');
+
+  }
+
   // Render the scene
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
@@ -141,3 +166,5 @@ function animate() {
 // Start the visualization
 init();
 animate();
+
+window.addEventListener( 'pointermove', onPointerMove );

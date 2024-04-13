@@ -50,7 +50,7 @@ function init() {
 
   // Load the cloud texture
   // clouds do not appear on the web browser & Debugging is needed
-  const cloudTexture = new THREE.TextureLoader().load('https://i.stack.imgur.com/B3c7G.jpg');
+  const cloudTexture = new THREE.TextureLoader().load('vite-project/src/assets/B3c7G.jpg');
 
   // Create the cloud layer
   const cloudGeometry = new THREE.SphereGeometry(26, 50, 50);
