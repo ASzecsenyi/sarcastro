@@ -1,15 +1,5 @@
-<html>
-<head>
-  <style>
-    body {
-      margin: 0;
-      overflow: hidden;
-    }
-  </style>
-</head>
-<body>
-  <script type="module">
-    import * as THREE from "https://web.cs.manchester.ac.uk/three/three.js-master/build/three.module.js";
+
+  import * as THREE from "https://web.cs.manchester.ac.uk/three/three.js-master/build/three.module.js";
     import { OrbitControls } from "https://web.cs.manchester.ac.uk/three/three.js-master/examples/jsm/controls/OrbitControls.js";
 
     // Global variables
@@ -53,14 +43,14 @@ function init() {
   scene.add(ambientLight);
 
   // Create the earth
-  earthGeometry = new THREE.SphereGeometry(25, 50, 50);
+  earthGeometry = new THREE.CylinderGeometry(50, 50, 10, 32);
   earthMaterial = new THREE.MeshPhongMaterial({
     color: 0x0000ff
   });
   earthMesh = new THREE.Mesh(earthGeometry, earthMaterial);
 
   // Load the cloud texture
-  // clouds do not appear on the web browser & Debugging is needed 
+  // clouds do not appear on the web browser & Debugging is needed
   const cloudTexture = new THREE.TextureLoader().load('https://i.stack.imgur.com/B3c7G.jpg');
 
   // Create the cloud layer
@@ -68,8 +58,7 @@ function init() {
   const cloudMaterial = new THREE.MeshPhongMaterial({
     map: cloudTexture,
     transparent: true,
-    opacity: 4.8
-  });
+    opacity: 4.8});
   cloudMesh = new THREE.Mesh(cloudGeometry, cloudMaterial);
   earthMesh.add(cloudMesh);
 
@@ -126,13 +115,13 @@ function animate() {
 
   // Optional: Rotate the sun, earth, and moon
   sunMesh.rotation.y += 0.001;
-  
+
   const earthRotationSpeed = 111.5;
   const cloudRotationSpeed = 0.08;
-  
+
   earthMesh.rotation.y += earthRotationSpeed;
   cloudMesh.rotation.y += cloudRotationSpeed;
-  
+
   moonMesh.rotation.y += 0.02;
 
   // Render the scene
@@ -143,6 +132,3 @@ function animate() {
 // Start the visualization
 init();
 animate();
-  </script>
-</body>
-</html>
