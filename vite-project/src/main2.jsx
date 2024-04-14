@@ -712,6 +712,7 @@ Note that to do this for yourself you would need to do these measurements at noo
             
             <br>
             <img src="public/Triangles_copy.jpg" alt="Description of the image" width="300" height="200">
+            <img src="public/sunmap.jpg" alt = "sdf">
             
         </p>
        
