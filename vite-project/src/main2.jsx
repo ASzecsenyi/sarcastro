@@ -673,62 +673,90 @@ const sidebarContentMap = {
     earth: `
         <h3>Earth</h3>
         <p>
-            ---Circumference---
-            An estimate for the circumference of the Earth was made over two thousand years ago by an ancient Greek polymath named Eratosthenes of Cyrene with just two poles. By measuring the angle of the shadow cast by two poles standing perfectly straight on the ground in two different locations, he was able to calculate the size of the Earth.
-            It goes as follows:
-            Assuming the Earth is a sphere, consider the rays of light coming from the sun. Imagine there are two poles placed straight up from the ground at two different cities where one is directly south from the other. Because of the Earth's curvature which itself is because the Earth is a sphere, each pole will cast a slightly different shadow on the ground depending on how close it is to the equator. At the equator, there will be no shadow, at the poles there will only be shadow. Using some straightforward maths, you can get the "angle" of the shadow. The difference between the angle of this shadow in the poles, compared to the equator is 90 degrees, corresponding to having travelled a quarter of the way around a circle or a sphere. So, if the difference in the shadows is 3.6 degrees, then you will have travelled a 100th of the Earth's total circumference. Multiplying the distance between the two cities by 100 will give you the total circumference of the planet!
-            This method led Eratosthenes to estimate the circumference of the Earth to be 40,320km which is remarkably close to today's known value of 40,007km measured with far more advanced tools.
-            Note that to do this for yourself you would need to do these measurements at noon (when the Sun is at the highest point in the sky) on the summer solstice (the longest day of the year).
+            <strong>
+                <p>How large is the Earth?</p>
+            </strong>
+            <p>
+
+            <p>An estimate for the circumference of the Earth was made over two thousand years ago by an ancient Greek polymath named Eratosthenes of Cyrene with just two poles. By measuring the angle of the shadow cast by two poles standing perfectly straight on the ground in two different locations, he was able to calculate the size of the Earth.
+It goes as follows:</p>
+<p>
+<p>
+<br>
+            <img src="public/Triangles_copy.jpg" alt="Description of the image" width="300" height="200">
+</p>
+Assuming the Earth is a sphere, consider the rays of light coming from the sun. Imagine there are two poles placed straight up from the ground at two different cities where one is directly south from the other. Because of the Earth’s curvature which itself is because the Earth is a sphere, each pole will cast a slightly different shadow on the ground depending on how close it is to the equator. At the equator, there will be no shadow, at the poles there will only be shadow. 
+Using some straightforward maths, you can get the “angle” of the shadow. The difference between the angle of this shadow in the poles, compared to the equator is 90 degrees, corresponding to having travelled a quarter of the way around a circle or a sphere. So, if the difference in the shadows is 3.6 degrees, then you will have travelled a 100th of the Earth’s total circumference. Multiplying the distance between the two cities by 100 will give you the total circumference of the planet! </p>
+This method led Eratosthenes to estimate the circumference of the Earth to be 40,320km which is remarkably close to today’s known value of 40,007km measured with far more advanced tools.
+Note that to do this for yourself you would need to do these measurements at noon (when the Sun is at the highest point in the sky) on the summer solstice (the longest day of the year).
+            
+            </p>
         </p>
     `,
     flat_earth: `
         <h3>Flat Earth</h3>
         <p>
-            ---Circumference---
-            The flat Earth model proposes that the Earth is a flat, disc-shaped plane, with the North Pole at the center and Antarctica as a wall around the edge. In this model, the circumference of the Earth would be the distance around the outer edge of the disc.
-            However, the flat Earth model is not supported by scientific evidence. The Earth has been observed and measured to be a nearly spherical planet, with a circumference of approximately 40,000 kilometers (24,901 miles) at the equator.
-            The idea of a flat Earth has been disproven by numerous observations and experiments, including:
-            1. Observations of ships disappearing bottom-first over the horizon.
+            <strong>can you see the mount everest?</strong>
+            <strong>What is wrong with this model?</strong>
+            <strong>
+                <p>But what is more important is that what made people get stuck with this for centuries? how scietific thinking overcome this fallacy</p>
+            </strong>
+            <p> Story: In ancient Miletus, Thales, a wise philosopher, believed the Earth was a flat disk floating on water. One evening, his pupil Anaximander, brimming with bold ideas, proposed a challenging hypothesis.
 
+            "Master," Anaximander said, "what if the Earth hangs suspended in the void, not floating on water, and is cylindrical in form?"
             
-            2. The ability to circumnavigate the globe.
-            3. Satellite imagery and photographs of the Earth from space.
-            4. The consistent measurements of the Earth's curvature.
-            The flat Earth model fails to explain these and many other observations, and it is not accepted by the scientific community as a valid representation of the Earth's shape.
+            Thales, intrigued and open-minded, welcomed Anaximander's daring thought. "Your vision is grand. Let us explore these mysteries together, for it is through questioning that we uncover truth."
+            
+            Thus, in the heart of Miletus, a new philosophical inquiry was born, pushing the boundaries of ancient understanding of the cosmos.</p>
+            
+            
+            <br>
+            <img src="public/Triangles_copy.jpg" alt="Description of the image" width="300" height="200">
+            
         </p>
-        <img src="public/sunmap.jpg" alt="Flat Earth" />
-        
-        
+       
+
     `,
     sun: `
         <h3>Sun</h3>
         <p>
-            ---Circumference---
-            The Sun is a nearly perfect sphere, with a circumference of approximately 4,379,000 kilometers (2,720,000 miles) at its equator. This is about 109 times the diameter of the Earth.
-            The Sun's shape is maintained by a balance between the outward pressure of the hot gas in its interior and the inward pull of its own gravity. This balance results in a state called hydrostatic equilibrium, which gives the Sun its spherical shape.
-            However, the Sun is not a perfect sphere. It rotates faster at its equator than at its poles, causing a slight bulge at the equator and flattening at the poles. This shape is known as an oblate spheroid. The difference in diameter between the Sun's equator and poles is about 10 kilometers (6.2 miles), which is very small compared to its overall size.
-            The Sun's size and shape have been measured using various techniques, including:
-            1. Solar eclipses: By measuring the size of the Moon's shadow on the Earth during a total solar eclipse, astronomers can calculate the relative sizes of the Sun and Moon.
-            2. Helioseismology: By studying the vibrations on the Sun's surface, scientists can infer its internal structure and size.
-            3. Spacecraft measurements: Space-based instruments, such as the Solar and Heliospheric Observatory (SOHO), have made precise measurements of the Sun's size and shape.
-            Understanding the Sun's size and shape is important for modeling its internal structure, dynamics, and evolution, as well as its interactions with the Earth and other objects in the solar system.
+            
+            <strong>
+                <p>How do we know the sun is in the center of the solar system</p>
+            </strong>
+            <p>
+            <p>The idea of a geocentric universe, one where the earth is at the centre of everything doesn’t sound completely crazy at first. Looking up at the sky, everything appears to move around the Earth, the Sun, the Moon and the stars. It also might feel nice to think that everything revolves around you. </p>
+            <p>There are small problems with viewing the universe in this way. One of them was the “retrograde” motion of the planets. If you record the movement of Venus for example, through the sky, you will see it travel in one direction and then appear to reverse for some time before continuing to move in the original direction. </p>
+            Problem:
+            The Sun and the Moon always move in the same direction at the same speed. This is easily explainable by saying the move around the Earth. However, the planets move backwards and forwards in a way that doesn’t make any sense if they’re on a fixed orbit around the Earth.
+            What would you do to fix this?
+            Solution:
+            A proposed solution back then was to have the planets move in a circle around their own orbit. Imagine it as a wheel on a wheel. This would provide a way for people back then to explain the retrograde motion of the planets. However, there were still problems with this solution. Over time, predictions would be inaccurate, and the model had another layer of complexity making it difficult to understand.
+
+    A man named Copernicus argued for a simpler model: heliocentrism. The planets in the sky all orbit the sun as opposed to the Earth. It would simplify the overall model greatly and provided more elegant answers to certain phenomena such as the retrograde motion of planets. It was however, not received terribly well as it relied on placing the planets in perfectly circular orbits around the Sun which resulted in the model not being able to predict the motion of the planets any more accurately than the preexisting geocentric model.
+    It was two advancements that spelled trouble for the egocentricity. Firstly, Galileo’s telescope allowed him to make certain observations such as the phases of Venus which would only be explained by Venus orbiting the Sun instead of the Earth as well as the discovery of Jupiter’s moons which cast doubt on the notion that the Earth was the only thing other bodies could orbit.
+    Lastly, Kepler’s laws and Newton’s theory of gravitation gave far more accurate predictions of the planets orbits than any other previous model and relied on the Sun being at the centre of the solar system, driving the last nail in the coffin for egocentricity (at least in the scientific world).
+            </p>
+
+            <br>
+            <img src="public/SunDistance.png" alt="Description of the image" width="300" height="200">
         </p>
     `,
-};
+    moon: `
+    <h3>Moon</h3>
+    <p>
+        <strong>---Circumference---</strong>
+        <strong>
+            <p>Question 1</p>
+        </strong>
+        <p>Explanation with examples</p>
 
-function toggleSidebar() {
-    const sidebar = document.querySelector('.sidebar');
-    const content = document.querySelector('.content');
-    sidebar.classList.toggle('open');
-    content.classList.toggle('open');
-    if (sidebar.classList.contains('open')) {
-        document.querySelector('.close-btn').style.top = '10px';
-        document.querySelector('.close-btn').style.right = '10px';
-    } else {
-        document.querySelector('.close-btn').style.top = '0px';
-        document.querySelector('.close-btn').style.right = '0px';
-    }
-}
+        <br>
+        <img src="public/Eclipses.png" alt="Description of the image" width="300" height="200">
+    </p>
+`
+,
+};
 
 function onPointerClick(event) {
     // update the picking ray with the camera and pointer position

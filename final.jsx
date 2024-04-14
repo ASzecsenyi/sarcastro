@@ -6,8 +6,13 @@ import {
 
 import Albedo from "./assets/Albedo.jpg"
 import sunmap from "./assets/sunmap.jpg"
-//import Eclipses from "./assests/Eclipses.png" 
+//import Eclipses from "./assests/Eclipses.png"
 
+const Sunmap = await loadTexture(sunmap)
+Sunmap.colorSpace = THREE.SRGBColorSpace
+
+const Venusmap = await loadTexture(venusmap)
+Venusmap.colorSpace = THREE.SRGBColorSpace
 
 const MoonTexture = new THREE.TextureLoader().load('https://s3-us-west-2.amazonaws.com/s.cdpn.io/17271/lroc_color_poles_1k.jpg');
 
