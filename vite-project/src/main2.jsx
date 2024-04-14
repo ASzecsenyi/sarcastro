@@ -239,7 +239,7 @@ function animate() {
             // zoom the camera on the earth
             const earthPosition = earthSystem.position;
             const venusPosition = venusMesh.position;
-            camera.position.set(earthPosition.x, earthPosition.y + 26, earthPosition.z);
+            camera.position.set(earthPosition.x, earthPosition.y + 31, earthPosition.z);
             // point the camera to the venus
             camera.lookAt(venusPosition);
 
