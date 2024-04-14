@@ -73,7 +73,11 @@ function init() {
     renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
     // center vertically
-    renderer.domElement.style.marginTop = '50px';
+    renderer.domElement.style.marginLeft = '25vw';
+
+    // Add orbit controls
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.autoRotate = true;
 
     // Z-index
 
@@ -96,7 +100,7 @@ function init() {
     });
 
     // Earth
-    earthGeometry = new THREE.SphereGeometry(25, 50, 50);
+    earthGeometry = new THREE.SphereGeometry(30, 50, 50);
     earthMaterial = new THREE.MeshPhongMaterial({
         //color: 0x0000ff,
         map: albedoMap
@@ -196,11 +200,6 @@ function init() {
     sunLight.position.copy(sunMesh.position);
     // move the light source to the sun
     scene.add(sunLight);
-
-
-    // Add orbit controls
-    controls = new OrbitControls(camera, renderer.domElement);
-    controls.autoRotate = true;
 }
 
 // make draw_orbit function
@@ -271,7 +270,7 @@ function erathostenes() {
     const earthSystemCenter = earthSystem.position;
     pole1Geometry.vertices.push(earthSystemCenter);
     pole2Geometry.vertices.push(earthSystemCenter);
-    // one vertex towards the sun, 30 units away from the center
+    // one vertex towards the sun, 35 units away from the center
     // for this calculate earh system to sun direction vector
     const sunPosition = sunMesh.position;
     console.log(sunPosition);
@@ -279,7 +278,7 @@ function erathostenes() {
         sunPosition.x - earthSystemCenter.x,
         sunPosition.y - earthSystemCenter.y,
         sunPosition.z - earthSystemCenter.z
-    ).normalize().multiplyScalar(30);
+    ).normalize().multiplyScalar(35);
     pole1Geometry.vertices.push(new THREE.Vector3().addVectors(earthSystemCenter, sunDirection));
     // pole2 is rotated up by 30 degrees
     const pole2Direction = sunDirection.clone().applyAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI / 5);
@@ -328,7 +327,96 @@ function erathostenes() {
 // add function to display sun earth distance measurement of aristarchus experiment
 
 function aristarchus() {
-    return [];
+
+    moonMesh.visible = false;
+
+    // calculate sun earth vector
+    const sunPosition = sunMesh.position;
+    const earthPosition = earthSystem.position;
+    const sunEarthVector = new THREE.Vector3(
+        - sunPosition.x + earthPosition.x,
+        - sunPosition.y + earthPosition.y,
+        - sunPosition.z + earthPosition.z
+    );
+
+    // add a decoy moon perpendicular to the sun earth vector, usual num of units away from the earth
+
+    // create the decoy moon
+    const moonGeometry = new THREE.SphereGeometry(6, 50, 50);
+    const moonMaterial = new THREE.MeshPhongMaterial({
+        //color: 0x808080,
+        map: MoonTexture
+    });
+
+    const moon = new THREE.Mesh(moonGeometry, moonMaterial);
+
+    // calculate the positions of the moons
+    let moonOrbitRadius = 60;
+    if (geocentricFlag) {
+        moonOrbitRadius = 120;
+    }
+    let moonWidth = 6;
+    if (bigMoonFlag) {
+        moonWidth = 15;
+    }
+
+    let earthWidth = 30;
+    if (flatEarthFlag) {
+        earthWidth = 50;
+    }
+
+    let angDiff = Math.PI / 2;
+
+
+    const moon1Position = new THREE.Vector3().addVectors(earthPosition, sunEarthVector.clone().normalize().applyAxisAngle(new THREE.Vector3(0, 1, 0), angDiff).multiplyScalar(moonOrbitRadius));
+
+    // set the positions of the moon
+    moon.position.set(moon1Position.x, moon1Position.y, moon1Position.z);
+     // add two horizontal lines that touch the earth on the sides and go further than monnOrbitRadius, and are parallel to the sun earth vector
+    const lineMaterial1 = new THREE.LineBasicMaterial({color: 0x0000ff});
+
+    const lineGeometry1 = new THREE.Geometry();
+    let p00 = earthPosition
+    lineGeometry1.vertices.push(p00);
+    let p01 = sunPosition;
+    lineGeometry1.vertices.push(p01);
+    const line1 = new THREE.Line(lineGeometry1, lineMaterial1);
+
+    const lineGeometry2 = new THREE.Geometry();
+    let p10 = earthPosition
+    lineGeometry2.vertices.push(p10);
+    let p11 = moon1Position;
+    lineGeometry2.vertices.push(p11);
+    const line2 = new THREE.Line(lineGeometry2, lineMaterial1);
+
+    // add two more lines identical to the previous two but red
+
+    const lineMaterial2 = new THREE.LineBasicMaterial({color: 0xff0000});
+
+    const lineGeometry3 = new THREE.Geometry();
+    let p20 = moon1Position
+    lineGeometry3.vertices.push(p20);
+    let p21 = sunPosition
+    lineGeometry3.vertices.push(p21);
+    //let p22 = new THREE.Vector3().addVectors(p20, sunEarthVector.clone().normalize().multiplyScalar(moonOrbitRadius*2));
+    //p22.applyAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI * angDiff * 0.5 * moonOrbitRadius / 120);
+    //lineGeometry3.vertices.push(p22);
+    const line3 = new THREE.Line(lineGeometry3, lineMaterial2);
+
+    // add the moons to the scene
+    scene.add(moon);
+
+    scene.add(line1);
+    scene.add(line2);
+    scene.add(line3);
+
+    // set the camera position to be earthPosition + sunEarthVector * 2
+    camera.position.set(earthPosition.x - sunEarthVector.x * 0.75, earthPosition.y - sunEarthVector.y * 0.75 + earthWidth*2, earthPosition.z - sunEarthVector.z * 0.75);
+    // point the camera to the moons
+    camera.lookAt(new THREE.Vector3().addVectors(earthPosition, sunEarthVector.clone().normalize().multiplyScalar(moonOrbitRadius * 2)));
+
+
+    return [moon, line1, line2, line3];
 }
 
 // add function to display what things are rotating around what of copernicus experiment
@@ -376,7 +464,7 @@ function moonmoon() {
         - sunPosition.z + earthPosition.z
     );
 
-    // add five decoy moons: one just opposite of the sun, one 45 degrees to the right, one 45 degrees to the left
+    // add six decoy moons: one just opposite of the sun, one 45 degrees to the right, one 45 degrees to the left
     // the moons are on their usual orbit
 
     // create the decoy moons
@@ -397,8 +485,9 @@ function moonmoon() {
     const moon1 = new THREE.Mesh(moonGeometry, moonMaterial);
     const moon2 = new THREE.Mesh(moonGeometry, moonMaterialInner);
     const moon3 = new THREE.Mesh(moonGeometry, moonMaterialMiddle);
-    const moon4 = new THREE.Mesh(moonGeometry, moonMaterialInner);
-    const moon5 = new THREE.Mesh(moonGeometry, moonMaterial);
+    const moon4 = new THREE.Mesh(moonGeometry, moonMaterialMiddle);
+    const moon5 = new THREE.Mesh(moonGeometry, moonMaterialInner);
+    const moon6 = new THREE.Mesh(moonGeometry, moonMaterial);
 
     // calculate the positions of the moons
     let moonOrbitRadius = 60;
@@ -406,11 +495,28 @@ function moonmoon() {
         moonOrbitRadius = 120;
     }
 
-    const moon1Position = new THREE.Vector3().addVectors(earthPosition, sunEarthVector.clone().normalize().applyAxisAngle(new THREE.Vector3(0, 1, 0), 2 * Math.PI / 6).multiplyScalar(moonOrbitRadius));
-    const moon2Position = new THREE.Vector3().addVectors(earthPosition, sunEarthVector.clone().normalize().applyAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI / 6).multiplyScalar(moonOrbitRadius));
-    const moon3Position = new THREE.Vector3().addVectors(earthPosition, sunEarthVector.clone().normalize().multiplyScalar(moonOrbitRadius));
-    const moon4Position = new THREE.Vector3().addVectors(earthPosition, sunEarthVector.clone().normalize().applyAxisAngle(new THREE.Vector3(0, 1, 0), -Math.PI / 6).multiplyScalar(moonOrbitRadius));
-    const moon5Position = new THREE.Vector3().addVectors(earthPosition, sunEarthVector.clone().normalize().applyAxisAngle(new THREE.Vector3(0, 1, 0), -2 * Math.PI / 6).multiplyScalar(moonOrbitRadius));
+    // calculate the angle difference we need between the moons
+    // the 2nd and 5th moons must be 4.5 moon widths apart
+    let moonWidth = 6;
+    if (bigMoonFlag) {
+        moonWidth = 15;
+    }
+
+    let earthWidth = 30;
+    if (flatEarthFlag) {
+        earthWidth = 50;
+    }
+
+    // angDiff is sin^-1(earthWidth / moonOrbitRadius) / 2
+    let angDiff = Math.asin((earthWidth - 1.5*moonWidth) / moonOrbitRadius) / 4;
+
+
+    const moon1Position = new THREE.Vector3().addVectors(earthPosition, sunEarthVector.clone().normalize().applyAxisAngle(new THREE.Vector3(0, 1, 0), -Math.PI * angDiff * 2.5).multiplyScalar(moonOrbitRadius));
+    const moon2Position = new THREE.Vector3().addVectors(earthPosition, sunEarthVector.clone().normalize().applyAxisAngle(new THREE.Vector3(0, 1, 0), -Math.PI * angDiff * 1.5).multiplyScalar(moonOrbitRadius));
+    const moon3Position = new THREE.Vector3().addVectors(earthPosition, sunEarthVector.clone().normalize().applyAxisAngle(new THREE.Vector3(0, 1, 0), -Math.PI * angDiff * 0.5).multiplyScalar(moonOrbitRadius));
+    const moon4Position = new THREE.Vector3().addVectors(earthPosition, sunEarthVector.clone().normalize().applyAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI * angDiff * 0.5).multiplyScalar(moonOrbitRadius));
+    const moon5Position = new THREE.Vector3().addVectors(earthPosition, sunEarthVector.clone().normalize().applyAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI * angDiff * 1.5).multiplyScalar(moonOrbitRadius));
+    const moon6Position = new THREE.Vector3().addVectors(earthPosition, sunEarthVector.clone().normalize().applyAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI * angDiff * 2.5).multiplyScalar(moonOrbitRadius));
 
 
     // set the positions of the moons
@@ -419,6 +525,57 @@ function moonmoon() {
     moon3.position.set(moon3Position.x, moon3Position.y, moon3Position.z);
     moon4.position.set(moon4Position.x, moon4Position.y, moon4Position.z);
     moon5.position.set(moon5Position.x, moon5Position.y, moon5Position.z);
+    moon6.position.set(moon6Position.x, moon6Position.y, moon6Position.z);
+
+    // add two horizontal lines that touch the earth on the sides and go further than monnOrbitRadius, and are parallel to the sun earth vector
+    const lineMaterial1 = new THREE.LineBasicMaterial({color: 0x0000ff});
+
+    const lineGeometry1 = new THREE.Geometry();
+    let p00 = earthPosition
+    // move the point to the surface of the earth
+    p00 = new THREE.Vector3().addVectors(p00, sunEarthVector.clone().normalize().multiplyScalar(earthWidth).applyAxisAngle(new THREE.Vector3(0, 1, 0), -Math.PI / 2));
+    lineGeometry1.vertices.push(p00);
+    let p01 = new THREE.Vector3().addVectors(p00, sunEarthVector.clone().normalize().multiplyScalar(moonOrbitRadius * 2));
+    lineGeometry1.vertices.push(p01);
+    const line1 = new THREE.Line(lineGeometry1, lineMaterial1);
+
+    const lineGeometry2 = new THREE.Geometry();
+    let p10 = earthPosition
+    // move the point to the surface of the earth
+    p10 = new THREE.Vector3().addVectors(p10, sunEarthVector.clone().normalize().multiplyScalar(-earthWidth).applyAxisAngle(new THREE.Vector3(0, 1, 0), -Math.PI / 2));
+    lineGeometry2.vertices.push(p10);
+    let p11 = new THREE.Vector3().addVectors(p10, sunEarthVector.clone().normalize().multiplyScalar(moonOrbitRadius * 2));
+    lineGeometry2.vertices.push(p11);
+    const line2 = new THREE.Line(lineGeometry2, lineMaterial1);
+
+    // add two more lines identical to the previous two but red
+
+    const lineMaterial2 = new THREE.LineBasicMaterial({color: 0xff0000});
+
+    const lineGeometry3 = new THREE.Geometry();
+    let p20 = earthPosition
+    // move the point to the surface of the earth
+    p20 = new THREE.Vector3().addVectors(p20, sunEarthVector.clone().normalize().multiplyScalar(earthWidth).applyAxisAngle(new THREE.Vector3(0, 1, 0), -Math.PI / 2));
+    lineGeometry3.vertices.push(p20);
+    let p21 = new THREE.Vector3().addVectors(earthPosition, sunEarthVector.clone().normalize().multiplyScalar(moonOrbitRadius * 2));
+    lineGeometry3.vertices.push(p21);
+    //let p22 = new THREE.Vector3().addVectors(p20, sunEarthVector.clone().normalize().multiplyScalar(moonOrbitRadius*2));
+    //p22.applyAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI * angDiff * 0.5 * moonOrbitRadius / 120);
+    //lineGeometry3.vertices.push(p22);
+    const line3 = new THREE.Line(lineGeometry3, lineMaterial2);
+
+    const lineGeometry4 = new THREE.Geometry();
+    let p30 = earthPosition
+    // move the point to the surface of the earth
+    p30 = new THREE.Vector3().addVectors(p30, sunEarthVector.clone().normalize().multiplyScalar(-earthWidth).applyAxisAngle(new THREE.Vector3(0, 1, 0), -Math.PI / 2));
+    lineGeometry4.vertices.push(p30);
+    let p31 = new THREE.Vector3().addVectors(earthPosition, sunEarthVector.clone().normalize().multiplyScalar(moonOrbitRadius*2));
+    lineGeometry4.vertices.push(p31);
+    //let p32 = new THREE.Vector3().addVectors(p30, sunEarthVector.clone().normalize().multiplyScalar(moonOrbitRadius*2));
+    //p32.applyAxisAngle(new THREE.Vector3(0, 1, 0), -Math.PI * angDiff * 0.5 * moonOrbitRadius / 120);
+    //lineGeometry4.vertices.push(p32);
+
+    const line4 = new THREE.Line(lineGeometry4, lineMaterial2);
 
     // add the moons to the scene
     scene.add(moon1);
@@ -426,8 +583,20 @@ function moonmoon() {
     scene.add(moon3);
     scene.add(moon4);
     scene.add(moon5);
+    scene.add(moon6);
 
-    return [moon1, moon2, moon3, moon4, moon5];
+    scene.add(line1);
+    scene.add(line2);
+    scene.add(line3);
+    scene.add(line4);
+
+    // set the camera position to be earthPosition + sunEarthVector * 2
+    camera.position.set(earthPosition.x - sunEarthVector.x * 0.75, earthPosition.y - sunEarthVector.y * 0.75 + earthWidth*2, earthPosition.z - sunEarthVector.z * 0.75);
+    // point the camera to the moons
+    camera.lookAt(new THREE.Vector3().addVectors(earthPosition, sunEarthVector.clone().normalize().multiplyScalar(moonOrbitRadius * 2)));
+
+
+    return [moon1, moon2, moon3, moon4, moon5, moon6, line1, line2, line3, line4];
 }
 
 // zoom on the earth and display measurements
