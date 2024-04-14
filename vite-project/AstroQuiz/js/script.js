@@ -6,6 +6,7 @@
     let audioMode = false;
     let currentQuestionIndex = 0;
     let score = 0; // Initialize score
+    single_digit = ['one', 'two', 'three', 'four'];
 
     const questions = [
         {
@@ -186,7 +187,7 @@
                     let spokenAnswer = transcript.toLowerCase().trim().replace(regex, '');
 
                     answerButtonsContainer.querySelectorAll('.btn').forEach((button, index) => {
-                        if (spokenAnswer == index + 1) {
+                        if (spokenAnswer == index + 1 || spokenAnswer == single_digit[index]) {
                             const isCorrect = button.dataset.correct == 'true';
                             if (isCorrect) {
                                 speak('Correct answer!');

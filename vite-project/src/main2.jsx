@@ -696,6 +696,9 @@ const sidebarContentMap = {
             4. The consistent measurements of the Earth's curvature.
             The flat Earth model fails to explain these and many other observations, and it is not accepted by the scientific community as a valid representation of the Earth's shape.
         </p>
+        <img src="public/sunmap.jpg" alt="Flat Earth" />
+        
+        
     `,
     sun: `
         <h3>Sun</h3>
@@ -734,7 +737,7 @@ function onPointerClick(event) {
     // calculate objects intersecting the picking ray
     const intersects = raycaster.intersectObjects(scene.children, true);
 
-    if (intersects.length > 0) {
+    if (intersects.length > 0 && !inTutorial) {
 
 
         const sidebarContent = document.querySelector('.sidebar-content');
