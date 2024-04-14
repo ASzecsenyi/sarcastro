@@ -5,9 +5,89 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite + React</title>
+    <style>
+        /* Global styles */
+        body {
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        /* Sidebar styles */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -420px;
+            width: 400px;
+            height: 100vh;
+            background-color: #f0f0f0;
+            transition: left 0.5s ease-in-out;
+            z-index: 1;
+            padding: 20px;
+        }
+        /* Main content styles */
+        .content {
+            position: relative;
+            z-index: 0;
+            padding: 20px;
+            transition: transform 0.5s ease-in-out;
+        }
+        /* Sidebar open state styles */
+        .sidebar.open {
+            left: 0;
+        }
+        /* Main content open state styles */
+        .content.open {
+            transform: translateX(300px);
+        }
+        /* Close button styles */
+        .close-btn {
+            position: absolute;
+            top: 0px;
+            right: 0px;
+            font-size: 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
   </head>
   <body>
+    <!-- React root element -->
     <div id="root"></div>
+    <!-- Sidebar -->
+    <div class="sidebar">
+
+        <div class="sidebar-content"></div>
+        <button class="close-btn" onclick="toggleSidebar()">&times;</button>
+    </div>
+    <!-- Main content -->
+    <div class="content">
+        <button id="toggleBtn" onclick="toggleSidebar()"></button>
+    </div>
+    <!-- JavaScript -->
+    <script>
+        // Get references to the sidebar and content elements
+        const sidebar = document.querySelector('.sidebar');
+        const content = document.querySelector('.content');
+        // Function to toggle the sidebar open/closed
+        function toggleSidebar() {
+            sidebar.classList.toggle('open');
+            content.classList.toggle('open');
+
+            // if closing sidebar, simulate escape key press
+            if (!sidebar.classList.contains('open')) {
+                document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+                // also set close button to have 10 top and left
+                document.querySelector('.close-btn').style.top = '0px';
+                document.querySelector('.close-btn').style.right = '0px';
+            } else {
+                // if opening sidebar, set close button to have 0 top and right
+                document.querySelector('.close-btn').style.top = '10px';
+                document.querySelector('.close-btn').style.right = '10px';
+            }
+        }
+    </script>
+    <!-- Load the main React component -->
     <script type="module" src="/src/main2.jsx"></script>
   </body>
 </html>

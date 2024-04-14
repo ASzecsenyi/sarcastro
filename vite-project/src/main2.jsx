@@ -73,7 +73,7 @@ function init() {
     renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
     // center vertically
-    renderer.domElement.style.marginLeft = '25vw';
+    //renderer.domElement.style.marginLeft = '25vw';
 
     // Add orbit controls
     controls = new OrbitControls(camera, renderer.domElement);
@@ -657,8 +657,74 @@ function displayMeasurement(experiment) {
             moonMesh.visible = true;
 
             inTutorial = false;
+
+            // call toggleSidebar
+            // const sidebar = document.querySelector('.sidebar');
+            // const content = document.querySelector('.content');
+            // sidebar.classList.toggle('open');
+            // content.classList.toggle('open');
+            // document.querySelector('.close-btn').style.top = '0px';
+            // document.querySelector('.close-btn').style.right = '0px';
         }
     });
+}
+
+const sidebarContentMap = {
+    earth: `
+        <h3>Earth</h3>
+        <p>
+            ---Circumference---
+            An estimate for the circumference of the Earth was made over two thousand years ago by an ancient Greek polymath named Eratosthenes of Cyrene with just two poles. By measuring the angle of the shadow cast by two poles standing perfectly straight on the ground in two different locations, he was able to calculate the size of the Earth.
+            It goes as follows:
+            Assuming the Earth is a sphere, consider the rays of light coming from the sun. Imagine there are two poles placed straight up from the ground at two different cities where one is directly south from the other. Because of the Earth's curvature which itself is because the Earth is a sphere, each pole will cast a slightly different shadow on the ground depending on how close it is to the equator. At the equator, there will be no shadow, at the poles there will only be shadow. Using some straightforward maths, you can get the "angle" of the shadow. The difference between the angle of this shadow in the poles, compared to the equator is 90 degrees, corresponding to having travelled a quarter of the way around a circle or a sphere. So, if the difference in the shadows is 3.6 degrees, then you will have travelled a 100th of the Earth's total circumference. Multiplying the distance between the two cities by 100 will give you the total circumference of the planet!
+            This method led Eratosthenes to estimate the circumference of the Earth to be 40,320km which is remarkably close to today's known value of 40,007km measured with far more advanced tools.
+            Note that to do this for yourself you would need to do these measurements at noon (when the Sun is at the highest point in the sky) on the summer solstice (the longest day of the year).
+        </p>
+    `,
+    flat_earth: `
+        <h3>Flat Earth</h3>
+        <p>
+            ---Circumference---
+            The flat Earth model proposes that the Earth is a flat, disc-shaped plane, with the North Pole at the center and Antarctica as a wall around the edge. In this model, the circumference of the Earth would be the distance around the outer edge of the disc.
+            However, the flat Earth model is not supported by scientific evidence. The Earth has been observed and measured to be a nearly spherical planet, with a circumference of approximately 40,000 kilometers (24,901 miles) at the equator.
+            The idea of a flat Earth has been disproven by numerous observations and experiments, including:
+            1. Observations of ships disappearing bottom-first over the horizon.
+
+            
+            2. The ability to circumnavigate the globe.
+            3. Satellite imagery and photographs of the Earth from space.
+            4. The consistent measurements of the Earth's curvature.
+            The flat Earth model fails to explain these and many other observations, and it is not accepted by the scientific community as a valid representation of the Earth's shape.
+        </p>
+    `,
+    sun: `
+        <h3>Sun</h3>
+        <p>
+            ---Circumference---
+            The Sun is a nearly perfect sphere, with a circumference of approximately 4,379,000 kilometers (2,720,000 miles) at its equator. This is about 109 times the diameter of the Earth.
+            The Sun's shape is maintained by a balance between the outward pressure of the hot gas in its interior and the inward pull of its own gravity. This balance results in a state called hydrostatic equilibrium, which gives the Sun its spherical shape.
+            However, the Sun is not a perfect sphere. It rotates faster at its equator than at its poles, causing a slight bulge at the equator and flattening at the poles. This shape is known as an oblate spheroid. The difference in diameter between the Sun's equator and poles is about 10 kilometers (6.2 miles), which is very small compared to its overall size.
+            The Sun's size and shape have been measured using various techniques, including:
+            1. Solar eclipses: By measuring the size of the Moon's shadow on the Earth during a total solar eclipse, astronomers can calculate the relative sizes of the Sun and Moon.
+            2. Helioseismology: By studying the vibrations on the Sun's surface, scientists can infer its internal structure and size.
+            3. Spacecraft measurements: Space-based instruments, such as the Solar and Heliospheric Observatory (SOHO), have made precise measurements of the Sun's size and shape.
+            Understanding the Sun's size and shape is important for modeling its internal structure, dynamics, and evolution, as well as its interactions with the Earth and other objects in the solar system.
+        </p>
+    `,
+};
+
+function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const content = document.querySelector('.content');
+    sidebar.classList.toggle('open');
+    content.classList.toggle('open');
+    if (sidebar.classList.contains('open')) {
+        document.querySelector('.close-btn').style.top = '10px';
+        document.querySelector('.close-btn').style.right = '10px';
+    } else {
+        document.querySelector('.close-btn').style.top = '0px';
+        document.querySelector('.close-btn').style.right = '0px';
+    }
 }
 
 function onPointerClick(event) {
@@ -667,6 +733,21 @@ function onPointerClick(event) {
 
     // calculate objects intersecting the picking ray
     const intersects = raycaster.intersectObjects(scene.children, true);
+
+    if (intersects.length > 0) {
+
+
+        const sidebarContent = document.querySelector('.sidebar-content');
+        const clickedObjectName = intersects[0].object.name;
+
+        // Check if the clicked object name exists in the sidebarContentMap
+        if (clickedObjectName in sidebarContentMap) {
+            sidebarContent.innerHTML = sidebarContentMap[clickedObjectName];
+            toggleSidebar();
+        } else {
+            sidebarContent.innerHTML = '<h3>Object Information</h3><p>This is the information about the clicked object.</p>';
+        }
+    }
 
     for (let i = 0; i < intersects.length; i++) {
 
