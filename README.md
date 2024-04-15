@@ -14,6 +14,7 @@ Thank you for your work!
 
 This project was made as a submission to the 
 
+- STUDENTHACK(on cosmic theme) challenge
 - UNICS (solar system education) challenge and 
 - GDSC (accessibility) 
 
